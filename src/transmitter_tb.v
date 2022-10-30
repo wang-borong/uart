@@ -26,13 +26,17 @@ initial begin
     /* baud_clk = 0; */
     sys_clk = 0;
     rst_n = 0;
-    even_odd = 1;
     #30
     rst_n = 1;
-    tx_data_in = 8'hcc;
+    even_odd = 0;
+    tx_data_in = 8'haa;
     tx_enable = 1;
+    #31000
+    even_odd = 1;
+    tx_data_in = 8'hcc;
 
-    #200000 $finish;
+
+    #300000 $finish;
 end
 
 initial begin
