@@ -9,7 +9,7 @@ module baud_gen (
 
 reg [8:0] baud_cnt;
 
-always @ (posedge sys_clk or negedge rst_n) begin
+always @ (posedge sys_clk) begin
     if (!rst_n) begin
         baud_cnt <= 0;
         baud_clk <= 0;

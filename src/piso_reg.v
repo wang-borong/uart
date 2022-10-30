@@ -11,7 +11,7 @@ module piso_reg (
 reg [9:0] temp_data;
 reg [3:0] i;
 
-always @ (negedge reg_rst_n or posedge reg_clk) begin
+always @ (posedge reg_clk) begin
     if (!reg_rst_n)
         serial_out <= 1'b1;
     else begin
