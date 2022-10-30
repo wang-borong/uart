@@ -3,7 +3,7 @@ module transmitter (
     input rst_n,
     input tx_enable,
     input even_odd,
-    input tx_data_in,
+    input [7:0] tx_data_in,
     output busy,
     output serial_out
 );
@@ -13,7 +13,7 @@ wire load;
 wire shift;
 wire parity_bit;
 
-baud_gen baud (
+baud_gen baud_gen (
     .sys_clk(sys_clk),
     .rst_n(rst_n),
     .baud_clk(baud_clk)
@@ -40,45 +40,9 @@ piso_reg piso_reg (
     .shift(shift),
     .parity_bit(parity_bit),
     .reg_rst_n(rst_n),
-    .p_date_in(tx_data_in),
+    .p_data_in(tx_data_in),
     .serial_out(serial_out)
 );
 
 endmodule
 
-module parity_gen (
-    input even_odd,
-    input tx_data_in,
-    output parity_bit
-);
-
-
-endmodule
-
-
-module piso_reg (
-    input load,
-    input shift,
-    input parity_bit,
-    input reg_rst_n,
-    input p_date_in,
-    input reg_clk,
-    output serial_out
-);
-
-
-
-endmodule
-
-module transmitter_fsm (
-    input fsm_clk,
-    input rst_n,
-    input tx_enable,
-    output busy,
-    output load,
-    output shift
-);
-
-
-
-endmodule
