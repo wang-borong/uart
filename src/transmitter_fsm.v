@@ -1,55 +1,82 @@
+`timescale 1ns/1ns
 module transmitter_fsm (
     input fsm_clk,
     input rst_n,
     input tx_enable,
-    output busy,
-    output load,
-    output shift
+    output reg busy,
+    output reg load,
+    output reg shift
 );
 
 `include "fsm_param.v"
 
 reg [1:0] fsm_state;
 reg [3:0] fsm_cnt;
+reg [1:0] fsm_next_state;
 
-always @ (posedge fsm_clk or negedge rst_n) begin
-    if (!rst_n)
-        fsm_cnt <= 0;
-    else begin
-        if (fsm_state == FSM_WAIT)
-            fsm_cnt <= 0;
-        else if (fsm_state == FSM_IDLE)
-            fsm_cnt <= 0;
-        else
-            fsm_cnt <= fsm_cnt + 1'b1;
-    end
-end
-
-always @ (posedge fsm_clk or negedge rst_n) begin
-    if (!rst_n) begin
-        fsm_state <= FSM_IDLE;
+always @ (fsm_state or fsm_cnt or tx_enable) begin
+    fsm_next_state = FSM_IDLE;
+    if (!tx_enable) begin
+        fsm_next_state = FSM_IDLE;
     end else begin
-        if (!tx_enable)
-            fsm_state <= FSM_IDLE;
-        else begin
-            if (fsm_state == FSM_IDLE) begin
-                fsm_state <= FSM_LOAD;
-            end else if (fsm_state == FSM_LOAD) begin
-                fsm_state <= FSM_SHIFT;
-            end else if (fsm_state == FSM_SHIFT) begin
-                if (fsm_cnt < 4'd10)
-                    fsm_state <= FSM_SHIFT;
-                else
-                    fsm_state <= FSM_WAIT;
-            end else begin
-                fsm_state <= FSM_IDLE;
-            end
+        case (fsm_state)
+            FSM_IDLE: fsm_next_state = FSM_LOAD;
+            FSM_LOAD: fsm_next_state = FSM_SHIFT;
+            FSM_SHIFT:
+                if (fsm_cnt < 4'd10) begin
+                    fsm_next_state = FSM_SHIFT;
+                end else
+                    fsm_next_state = FSM_WAIT;
+                FSM_WAIT: fsm_next_state = FSM_IDLE;
+                default: fsm_next_state = FSM_IDLE;
+            endcase
         end
     end
-end
 
-assign load = fsm_state == FSM_LOAD;
-assign shift = fsm_state == FSM_SHIFT;
-assign busy = load | shift;
+    always @ (posedge fsm_clk) begin
+        if (!rst_n) begin
+            fsm_state <= #1 FSM_IDLE;
+            fsm_cnt <= #1 0;
+            busy <= #1 0;
+            load <= #1 0;
+            shift <= #1 0;
+        end else begin
+            fsm_state <= #1 fsm_next_state;
+            case (fsm_state)
+                FSM_IDLE: begin
+                    fsm_cnt <= #1 0;
+                    busy <= #1 0;
+                    load <= #1 0;
+                    shift <= #1 0;
+                end
+                FSM_LOAD: begin
+                    fsm_cnt <= #1 fsm_cnt + 1'b1;
+                    busy <= #1 1'b1;
+                    load <= #1 1'b1;
+                    shift <= #1 0;
+                end
+                FSM_SHIFT: begin
+                    fsm_cnt <= #1 fsm_cnt + 1'b1;
+                    busy <= #1 1'b1;
+                    load <= #1 0;
+                    shift <= #1 1'b1;
+                end
+                FSM_WAIT: begin
+                    fsm_cnt <= #1 0;
+                    busy <= #1 0;
+                    load <= #1 0;
+                    shift <= #1 0;
+                end
+                default: begin
 
-endmodule
+                    fsm_state <= #1 FSM_IDLE;
+                    fsm_cnt <= #1 0;
+                    busy <= #1 0;
+                    load <= #1 0;
+                    shift <= #1 0;
+                end
+            endcase
+        end
+    end
+
+    endmodule
