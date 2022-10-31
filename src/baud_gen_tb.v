@@ -21,10 +21,10 @@ wire baud_clk;
 always #10 sys_clk = !sys_clk;
 
 initial begin
-    sys_clk = 0;
-    rst_n = 0;
+    sys_clk = 1'b0;
+    rst_n = 1'b0;
     $monitor($time, " baud_clk: %d\n", baud_clk);
-    #30 rst_n = 1;
+    #30 rst_n = 1'b1;
 
     #40000 $finish;
 end

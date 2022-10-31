@@ -35,9 +35,9 @@ initial begin
     $monitor($time, " busy=%d, load=%d, shift=%d\n", busy, load, shift);
 
     #30
-    rst_n = 1;
+    rst_n = 1'b1;
     #5
-    tx_enable = 1;
+    tx_enable = 1'b1;
 
     #300000 $finish;
 end

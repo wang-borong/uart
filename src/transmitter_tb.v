@@ -24,15 +24,15 @@ initial begin
     $monitor($time, " serial_out %d, busy=%d\n", serial_out, busy);
     #30
     /* baud_clk = 0; */
-    sys_clk = 0;
-    rst_n = 0;
+    sys_clk = 1'b0;
+    rst_n = 1'b0;
     #30
-    rst_n = 1;
-    even_odd = 0;
+    rst_n = 1'b1;
+    even_odd = 1'b0;
     tx_data_in = 8'haa;
-    tx_enable = 1;
+    tx_enable = 1'b1;
     #31000
-    even_odd = 1;
+    even_odd = 1'b1;
     tx_data_in = 8'hcc;
 
 

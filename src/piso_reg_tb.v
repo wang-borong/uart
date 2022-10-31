@@ -57,13 +57,13 @@ initial begin
     $monitor($time, " serial_out %d\n", serial_out);
     #30
     /* baud_clk = 0; */
-    sys_clk = 0;
-    rst_n = 0;
-    even_odd = 1;
+    sys_clk = 1'b0;
+    rst_n = 1'b0;
+    even_odd = 1'b1;
     #30
-    rst_n = 1;
+    rst_n = 1'b1;
     p_data_in = 8'hcc;
-    tx_enable = 1;
+    tx_enable = 1'b1;
 
     #200000 $finish;
 end

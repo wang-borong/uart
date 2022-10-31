@@ -11,14 +11,14 @@ reg [8:0] baud_cnt;
 
 always @ (posedge sys_clk) begin
     if (!rst_n) begin
-        baud_cnt <= 0;
-        baud_clk <= 0;
+        baud_cnt <= #1 9'd0;
+        baud_clk <= #1 1'b0;
     end else begin
         if (baud_cnt == 216) begin
-            baud_cnt <= 0;
-            baud_clk <= !baud_clk;
+            baud_cnt <= #1 9'd0;
+            baud_clk <= #1 !baud_clk;
         end else
-            baud_cnt <= baud_cnt + 1;
+            baud_cnt <= #1 baud_cnt + 1;
     end
 end
 
