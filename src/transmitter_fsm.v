@@ -8,13 +8,17 @@ module transmitter_fsm (
     output reg shift
 );
 
-`include "fsm_param.v"
+parameter FSM_IDLE  = 2'd0;
+parameter FSM_LOAD  = 2'd1;
+parameter FSM_SHIFT = 2'd2;
+parameter FSM_WAIT  = 2'd3;
 
 reg [1:0] fsm_state;
 reg [3:0] fsm_cnt;
 reg [1:0] fsm_next_state;
 
-always @ (fsm_state or fsm_cnt or tx_enable) begin
+always @ (fsm_state or fsm_cnt or tx_enable)
+begin: FSM_NEXT_STATE_COMBO
     fsm_next_state = FSM_IDLE;
     if (!tx_enable) begin
         fsm_next_state = FSM_IDLE;
@@ -27,56 +31,75 @@ always @ (fsm_state or fsm_cnt or tx_enable) begin
                     fsm_next_state = FSM_SHIFT;
                 end else
                     fsm_next_state = FSM_WAIT;
-                FSM_WAIT: fsm_next_state = FSM_IDLE;
-                default: fsm_next_state = FSM_IDLE;
-            endcase
-        end
+            FSM_WAIT: fsm_next_state = FSM_IDLE;
+            default: fsm_next_state = FSM_IDLE;
+        endcase
     end
+end
 
-    always @ (posedge fsm_clk) begin
-        if (!rst_n) begin
-            fsm_state <= #1 FSM_IDLE;
-            fsm_cnt <= #1 0;
-            busy <= #1 0;
-            load <= #1 0;
-            shift <= #1 0;
-        end else begin
-            fsm_state <= #1 fsm_next_state;
-            case (fsm_state)
-                FSM_IDLE: begin
-                    fsm_cnt <= #1 0;
-                    busy <= #1 0;
-                    load <= #1 0;
-                    shift <= #1 0;
-                end
-                FSM_LOAD: begin
-                    fsm_cnt <= #1 fsm_cnt + 1'b1;
-                    busy <= #1 1'b1;
-                    load <= #1 1'b1;
-                    shift <= #1 0;
-                end
-                FSM_SHIFT: begin
-                    fsm_cnt <= #1 fsm_cnt + 1'b1;
-                    busy <= #1 1'b1;
-                    load <= #1 0;
-                    shift <= #1 1'b1;
-                end
-                FSM_WAIT: begin
-                    fsm_cnt <= #1 0;
-                    busy <= #1 0;
-                    load <= #1 0;
-                    shift <= #1 0;
-                end
-                default: begin
-
-                    fsm_state <= #1 FSM_IDLE;
-                    fsm_cnt <= #1 0;
-                    busy <= #1 0;
-                    load <= #1 0;
-                    shift <= #1 0;
-                end
-            endcase
-        end
+always @ (posedge fsm_clk)
+begin: FSM_CUR_STATE_SEQ
+    if (!rst_n) begin
+        fsm_state <= #1 FSM_IDLE;
+        fsm_cnt <= #1 1'b0;
+    end else begin
+        fsm_state <= #1 fsm_next_state;
+        case (fsm_state)
+            FSM_IDLE: begin
+                fsm_cnt <= #1 1'b0;
+            end
+            FSM_LOAD: begin
+                fsm_cnt <= #1 fsm_cnt + 1'b1;
+            end
+            FSM_SHIFT: begin
+                fsm_cnt <= #1 fsm_cnt + 1'b1;
+            end
+            FSM_WAIT: begin
+                fsm_cnt <= #1 1'b0;
+            end
+            default: begin
+                fsm_state <= #1 FSM_IDLE;
+                fsm_cnt <= #1 1'b0;
+            end
+        endcase
     end
+end
 
-    endmodule
+always @ (posedge fsm_clk)
+begin: FSM_OUTPUT_SEQ
+    if (!rst_n) begin
+        busy <= #1 1'b0;
+        load <= #1 1'b0;
+        shift <= #1 1'b0;
+    end else begin
+        case (fsm_state)
+            FSM_IDLE: begin
+                busy <= #1 1'b0;
+                load <= #1 1'b0;
+                shift <= #1 1'b0;
+            end
+            FSM_LOAD: begin
+                busy <= #1 1'b1;
+                load <= #1 1'b1;
+                shift <= #1 1'b0;
+            end
+            FSM_SHIFT: begin
+                busy <= #1 1'b1;
+                load <= #1 1'b0;
+                shift <= #1 1'b1;
+            end
+            FSM_WAIT: begin
+                busy <= #1 1'b0;
+                load <= #1 1'b0;
+                shift <= #1 1'b0;
+            end
+            default: begin
+                busy <= #1 1'b0;
+                load <= #1 1'b0;
+                shift <= #1 1'b0;
+            end
+        endcase
+    end
+end
+
+endmodule
