@@ -3,9 +3,9 @@ module receiver (
     input rst_n,
     input serial_data_in,
     // FIXME
-    output parallel_data_out,
+    output [7:0] parallel_data_out,
     output busy,
-    ouput data_valid
+    output data_valid
 );
 
 wire baud_clk;
