@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module baud_gen (
     input sys_clk,
     input rst_n,
