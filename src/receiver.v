@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module receiver (
     input sys_clk,
     input rst_n,
@@ -19,13 +20,12 @@ baud_gen baud_gen (
     .baud_clk(baud_clk)
 );
 
-negedge_detec negedge_detec (
+negedge_detector negedge_detector (
     .det_rst_n(rst_n),
     .det_clk(baud_clk),
     .det_input(serial_data_in),
     .det_output(det_output)
 );
-
 
 rx_fsm rx_fsm (
     .fsm_clk(baud_clk),
@@ -44,36 +44,10 @@ sipo_reg sipo_reg (
     .parallel_data_out(parallel_data_out)
 );
 
-
 parity_chk parity_chk (
     .data_in(parallel_data_out),
     .checker_out(data_valid)
 );
-
-
-endmodule
-
-
-module negedge_detec (
-    input det_clk,
-    input det_rst_n,
-    input det_input,
-    output det_output
-);
-
-
-endmodule
-
-
-module rx_fsm (
-    input fsm_clk,
-    input fsm_rst_n,
-    input start_detect_bit,
-    output load,
-    output shift,
-    output busy
-);
-
 
 endmodule
 
@@ -83,14 +57,16 @@ module sipo_reg (
     input load,
     input shift,
     input serial_data_in,
-    output parallel_data_out
+    output [7:0] parallel_data_out
 );
 
 endmodule
 
 module parity_chk (
-    input data_in,
+    input [8:0] data_in,
     output checker_out
 );
+
+assign checker_out = ^data_in[8:1] ^ 1'b1 == data_in[0];
 
 endmodule
