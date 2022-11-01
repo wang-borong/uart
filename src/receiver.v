@@ -3,7 +3,6 @@ module receiver (
     input sys_clk,
     input rst_n,
     input serial_data_in,
-    // FIXME
     output [7:0] parallel_data_out,
     output busy,
     output data_valid
@@ -13,6 +12,7 @@ wire baud_clk;
 wire det_output;
 wire load;
 wire shift;
+reg [8:0] pdata_temp;
 
 baud_gen baud_gen (
     .sys_clk(sys_clk),
@@ -32,7 +32,8 @@ rx_fsm rx_fsm (
     .fsm_rst_n(rst_n),
     .start_detect_bit(det_output),
     .load(load),
-    .shift(shift)
+    .shift(shift),
+    .busy(busy)
 );
 
 sipo_reg sipo_reg (
@@ -41,13 +42,15 @@ sipo_reg sipo_reg (
     .load(load),
     .shift(shift),
     .serial_data_in(serial_data_in),
-    .parallel_data_out(parallel_data_out)
+    .parallel_data_out(pdata_temp)
 );
 
 parity_chk parity_chk (
-    .data_in(parallel_data_out),
+    .data_in(pdata_temp),
     .checker_out(data_valid)
 );
+
+assign parallel_data_out = pdata_temp[8:1];
 
 endmodule
 
@@ -57,8 +60,22 @@ module sipo_reg (
     input load,
     input shift,
     input serial_data_in,
-    output [7:0] parallel_data_out
+    output [8:0] parallel_data_out
 );
+
+reg [8:0] data_temp;
+always @ (posedge reg_clk) begin
+    if (!reg_rst_n)
+        data_temp <= #1 9'h0;
+    else begin
+        if (shift)
+            data_temp <= #1 {serial_data_in, data_temp[8:1]};
+        else if (load)
+            parallel_data_out <= #1 data_temp;
+        else
+            data_temp <= #1 data_temp;
+    end
+end
 
 endmodule
 

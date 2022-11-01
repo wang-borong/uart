@@ -26,7 +26,7 @@ begin: FSM_NEXT_STATE_COMBO
             else
                 fsm_next_state = FSM_IDLE;
         FSM_SHIFT:
-            if (fsm_cnt < 10)
+            if (fsm_cnt < 9)
                 fsm_next_state = FSM_SHIFT;
             else
                 fsm_next_state = FSM_LOAD;
