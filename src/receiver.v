@@ -1,4 +1,3 @@
-`timescale 1ns/1ns
 module receiver (
     input sys_clk,
     input rst_n,
@@ -50,40 +49,6 @@ parity_chk parity_chk (
     .checker_out(data_valid)
 );
 
-assign parallel_data_out = pdata_temp[8:1];
-
-endmodule
-
-module sipo_reg (
-    input reg_rst_n,
-    input reg_clk,
-    input load,
-    input shift,
-    input serial_data_in,
-    output [8:0] parallel_data_out
-);
-
-reg [8:0] data_temp;
-always @ (posedge reg_clk) begin
-    if (!reg_rst_n)
-        data_temp <= #1 9'h0;
-    else begin
-        if (shift)
-            data_temp <= #1 {serial_data_in, data_temp[8:1]};
-        else if (load)
-            parallel_data_out <= #1 data_temp;
-        else
-            data_temp <= #1 data_temp;
-    end
-end
-
-endmodule
-
-module parity_chk (
-    input [8:0] data_in,
-    output checker_out
-);
-
-assign checker_out = ^data_in[8:1] ^ 1'b1 == data_in[0];
+assign parallel_data_out = pdata_temp[7:0];
 
 endmodule
