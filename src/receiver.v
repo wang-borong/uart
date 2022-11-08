@@ -11,7 +11,7 @@ wire baud_clk;
 wire det_output;
 wire load;
 wire shift;
-reg [8:0] pdata_temp;
+wire [8:0] pdata_temp;
 
 baud_gen baud_gen (
     .sys_clk(sys_clk),
